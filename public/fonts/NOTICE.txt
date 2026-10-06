@@ -1,0 +1,12 @@
+All fonts in this folder are licensed under the SIL Open Font License 1.1,
+included here as OFL-DotGothic16.txt and OFL-ShipporiMinchoB1.txt.
+
+shippori-mincho-b1-latin-400.woff2 and shippori-mincho-b1-latin-700.woff2 are
+the Latin subsets of Shippori Mincho B1 as served by Google Fonts.
+
+dotgothic16-latin.woff2 is a subset of DotGothic16-Regular.ttf that keeps
+Latin, punctuation, arrows, box drawing, geometric shapes, the black star and
+the katakana middle dot.
+
+DotGothic16: https://github.com/fontworks-fonts/DotGothic16
+Shippori Mincho B1: https://github.com/fontdasu/ShipporiMincho

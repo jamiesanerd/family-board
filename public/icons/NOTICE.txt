@@ -1,0 +1,6 @@
+cloud-rain.svg and cloud-fog.svg are from HackerNoon's Pixel Icon Library,
+MIT, see LICENSE-hackernoon-pixel-icon-library.txt.
+https://github.com/hackernoon/pixel-icon-library
+
+The rest are from pixelarticons, MIT, see LICENSE-pixelarticons.txt.
+https://github.com/halfmage/pixelarticons
