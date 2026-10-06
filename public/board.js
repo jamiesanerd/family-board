@@ -1,3 +1,4 @@
+import { getCalendarStaleNote } from './calendar-stale-note.js';
 import { getInkMasks } from './riso-photo.js';
 import { getSpanLanes } from './span-lanes.js';
 import { getTheme } from './theme.js';
@@ -119,6 +120,13 @@ function renderStaleNote({ element, updatedAt, now }) {
 	element.textContent = isStale ? `updated ${formatTime(new Date(updatedAt))}` : '';
 }
 
+function renderCalendarStaleNote({ calendars, now }) {
+	const element = findElement('.calendar-stale');
+	const note = getCalendarStaleNote({ calendars, now, staleAfterMs: STALE_AFTER_MS, formatTime });
+	element.hidden = !note;
+	element.textContent = note;
+}
+
 function createForecastCondition({ label, iconName }) {
 	if (!iconName) {
 		return createElement({ tag: 'span', className: 'weather-forecast-label', text: label });
@@ -227,12 +235,13 @@ function drawSpanStripes(calendar) {
 	overlay.replaceChildren(...rows.map((row) => createSpanStripe({ row, groups, overlayTop })));
 }
 
-function renderCalendar({ days, calendarUpdatedAt, now }) {
+function renderCalendar({ days, calendars, now }) {
 	const calendar = findElement('.calendar');
 	const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 	const upcomingDays = days.filter((day) => parseLocalDate(day.date) >= today);
 	if (upcomingDays.length === 0) {
-		const message = calendarUpdatedAt ? 'Nothing on the calendar this month' : 'Calendar unavailable';
+		const hasLoadedCalendar = calendars.some((calendar) => calendar.updatedAt !== null);
+		const message = hasLoadedCalendar ? 'Nothing on the calendar this month' : 'Calendar unavailable';
 		calendar.replaceChildren(createElement({ tag: 'li', className: 'calendar-empty', text: message }));
 		findElement('.calendar-spans').replaceChildren();
 		return;
@@ -314,9 +323,9 @@ function render() {
 		return;
 	}
 	renderWeather(board.weather);
-	renderCalendar({ days: board.days, calendarUpdatedAt: board.calendarUpdatedAt, now });
+	renderCalendar({ days: board.days, calendars: board.calendars, now });
 	renderStaleNote({ element: findElement('.weather-stale'), updatedAt: board.weatherUpdatedAt, now });
-	renderStaleNote({ element: findElement('.calendar-stale'), updatedAt: board.calendarUpdatedAt, now });
+	renderCalendarStaleNote({ calendars: board.calendars, now });
 }
 
 async function loadBoard() {

@@ -4,26 +4,29 @@ import { type BoardWeather } from './weather.ts';
 const UPCOMING_DAY_COUNT = 30;
 
 interface RefreshSources {
-	loadCalendar: () => Promise<string>;
+	loadCalendar: (name: string) => Promise<string>;
 	loadWeather: () => Promise<BoardWeather>;
 	now: Date;
+}
+
+interface CalendarCopy {
+	text: string | null;
+	updatedAt: string | null;
 }
 
 function getErrorMessage(error: unknown) {
 	return error instanceof Error ? error.message : String(error);
 }
 
-export function createBoardState() {
-	let calendarText: string | null = null;
-	let calendarUpdatedAt: string | null = null;
+export function createBoardState(calendarNames: string[]) {
+	const calendarCopies = new Map<string, CalendarCopy>(calendarNames.map((name) => [name, { text: null, updatedAt: null }]));
 	let weather: BoardWeather | null = null;
 	let weatherUpdatedAt: string | null = null;
 
-	async function refreshCalendar({ loadCalendar, now }: Pick<RefreshSources, 'loadCalendar' | 'now'>) {
-		const text = await loadCalendar();
-		getUpcomingDays({ icsText: text, now, dayCount: UPCOMING_DAY_COUNT });
-		calendarText = text;
-		calendarUpdatedAt = now.toISOString();
+	async function refreshCalendar({ name, loadCalendar, now }: { name: string; loadCalendar: RefreshSources['loadCalendar']; now: Date }) {
+		const text = await loadCalendar(name);
+		getUpcomingDays({ icsTexts: [text], now, dayCount: UPCOMING_DAY_COUNT });
+		calendarCopies.set(name, { text, updatedAt: now.toISOString() });
 	}
 
 	async function refreshWeather({ loadWeather, now }: Pick<RefreshSources, 'loadWeather' | 'now'>) {
@@ -32,14 +35,13 @@ export function createBoardState() {
 	}
 
 	async function refresh({ loadCalendar, loadWeather, now }: RefreshSources) {
-		const [calendarResult, weatherResult] = await Promise.allSettled([
-			refreshCalendar({ loadCalendar, now }),
-			refreshWeather({ loadWeather, now })
+		const [weatherResult, ...calendarResults] = await Promise.allSettled([
+			refreshWeather({ loadWeather, now }),
+			...calendarNames.map((name) => refreshCalendar({ name, loadCalendar, now }))
 		]);
-		const problems: string[] = [];
-		if (calendarResult.status === 'rejected') {
-			problems.push(`calendar: ${getErrorMessage(calendarResult.reason)}`);
-		}
+		const problems = calendarResults.flatMap((result, index) => {
+			return result.status === 'rejected' ? [`calendar "${calendarNames[index]}": ${getErrorMessage(result.reason)}`] : [];
+		});
 		if (weatherResult.status === 'rejected') {
 			problems.push(`weather: ${getErrorMessage(weatherResult.reason)}`);
 		}
@@ -47,8 +49,10 @@ export function createBoardState() {
 	}
 
 	function snapshot(now: Date) {
-		const days = calendarText ? getUpcomingDays({ icsText: calendarText, now, dayCount: UPCOMING_DAY_COUNT }) : [];
-		return { days, weather, calendarUpdatedAt, weatherUpdatedAt };
+		const icsTexts = [...calendarCopies.values()].flatMap((copy) => (copy.text === null ? [] : [copy.text]));
+		const days = getUpcomingDays({ icsTexts, now, dayCount: UPCOMING_DAY_COUNT });
+		const calendars = calendarNames.map((name) => ({ name, updatedAt: calendarCopies.get(name)?.updatedAt ?? null }));
+		return { days, weather, weatherUpdatedAt, calendars };
 	}
 
 	return { refresh, snapshot };

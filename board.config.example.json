@@ -1,5 +1,8 @@
 {
-	"calendarURL": "https://calendar.google.com/calendar/ical/[your-calendar-id]/private-[secret]/basic.ics",
+	"calendars": [
+		{ "name": "Family", "url": "https://calendar.google.com/calendar/ical/[your-calendar-id]/private-[secret]/basic.ics" },
+		{ "name": "Sam", "url": "webcal://p01-caldav.icloud.com/published/2/[secret]" }
+	],
 	"latitude": 40.71,
 	"longitude": -74.01,
 	"temperatureUnit": "fahrenheit",

@@ -121,15 +121,26 @@ function compareEvents(first: BoardEvent, second: BoardEvent) {
 	return byStart || first.title.localeCompare(second.title);
 }
 
-export function getUpcomingDays({ icsText, now, dayCount }: { icsText: string; now: Date; dayCount: number }) {
-	const calendar = new ICAL.Component(ICAL.parse(icsText));
+function parseCalendar(icsText: string) {
+	if (!icsText.trimStart().startsWith('BEGIN:VCALENDAR')) {
+		throw new Error('answered with something that is not a calendar, the link may have been reset');
+	}
+	return new ICAL.Component(ICAL.parse(icsText));
+}
+
+function getCalendarEvents({ icsText, now, windowEnd }: { icsText: string; now: Date; windowEnd: Date }) {
+	const calendar = parseCalendar(icsText);
 	registerTimezones(calendar);
-	const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-	const windowEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + dayCount);
-	const events = getEvents(calendar)
+	return getEvents(calendar)
 		.flatMap((event) => getOccurrences({ event, windowEnd }))
 		.map(toBoardEvent)
 		.filter((event) => event.isAllDay || new Date(event.endsAt) > now);
+}
+
+export function getUpcomingDays({ icsTexts, now, dayCount }: { icsTexts: string[]; now: Date; dayCount: number }) {
+	const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+	const windowEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + dayCount);
+	const events = icsTexts.flatMap((icsText) => getCalendarEvents({ icsText, now, windowEnd }));
 	const listedEvents = new Set<BoardEvent>();
 	const days: BoardDay[] = [];
 	for (let offset = 0; offset < dayCount; offset++) {

@@ -23,11 +23,20 @@ function loadConfig() {
 }
 
 const config = loadConfig();
-const boardState = createBoardState();
+const calendarURLs = new Map(config.calendars.map((calendar) => [calendar.name, calendar.url]));
+const boardState = createBoardState(config.calendars.map((calendar) => calendar.name));
+
+function loadCalendar(name: string) {
+	const url = calendarURLs.get(name);
+	if (!url) {
+		return Promise.reject(new Error('not in board.config.json'));
+	}
+	return fetchCalendarText(url);
+}
 
 async function refreshBoard() {
 	const problems = await boardState.refresh({
-		loadCalendar: () => fetchCalendarText(config.calendarURL),
+		loadCalendar,
 		loadWeather: () => fetchWeather(config),
 		now: new Date()
 	});

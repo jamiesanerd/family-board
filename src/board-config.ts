@@ -1,8 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+export interface CalendarConfig {
+	name: string;
+	url: string;
+}
+
 export interface BoardConfig {
-	calendarURL: string;
+	calendars: CalendarConfig[];
 	latitude: number;
 	longitude: number;
 	temperatureUnit: 'fahrenheit' | 'celsius';
@@ -11,16 +16,49 @@ export interface BoardConfig {
 
 const CONFIG_PATH = join(import.meta.dirname, '..', 'board.config.json');
 const TEMPERATURE_UNITS = ['fahrenheit', 'celsius'];
+const CALENDARS_EXAMPLE = '[{ "name": "Family", "url": "https://…/basic.ics" }]';
+const CALENDAR_PROTOCOLS = ['http:', 'https:'];
 
 function configError(problem: string) {
 	return new Error(`board.config.json: ${problem}`);
 }
 
-function calendarURLSetting(value: unknown) {
-	if (typeof value !== 'string' || !URL.canParse(value)) {
-		throw configError('calendarURL must be the secret iCal address from Google Calendar settings');
+function getCalendarLabel({ entry, index }: { entry: unknown; index: number }) {
+	const name = typeof entry === 'object' && entry !== null ? (entry as Record<string, unknown>).name : undefined;
+	return typeof name === 'string' && name.trim() ? `calendars[${index}] (${JSON.stringify(name)})` : `calendars[${index}]`;
+}
+
+function calendarURLSetting({ value, label }: { value: unknown; label: string }) {
+	const url = typeof value === 'string' ? value.replace(/^webcal:\/\//i, 'https://') : '';
+	if (!URL.canParse(url) || !CALENDAR_PROTOCOLS.includes(new URL(url).protocol)) {
+		throw configError(`${label}: url must be an iCal link, the secret iCal address from the calendar's settings`);
 	}
-	return value;
+	return url;
+}
+
+function calendarSetting({ entry, index }: { entry: unknown; index: number }) {
+	const label = getCalendarLabel({ entry, index });
+	if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
+		throw configError(`${label} must be an object with a name and a url`);
+	}
+	const { name, url } = entry as Record<string, unknown>;
+	if (typeof name !== 'string' || !name.trim()) {
+		throw configError(`${label}: name must be some text, like "Family"`);
+	}
+	return { name, url: calendarURLSetting({ value: url, label }) };
+}
+
+function calendarsSetting(value: unknown) {
+	if (!Array.isArray(value) || value.length === 0) {
+		throw configError(`calendars must be a list with at least one calendar, like ${CALENDARS_EXAMPLE}`);
+	}
+	const calendars = value.map((entry, index) => calendarSetting({ entry, index }));
+	const names = calendars.map((calendar) => calendar.name);
+	const repeatedName = names.find((name, index) => names.indexOf(name) !== index);
+	if (repeatedName !== undefined) {
+		throw configError(`calendars: the name ${JSON.stringify(repeatedName)} is used twice, each calendar needs its own`);
+	}
+	return calendars;
 }
 
 function coordinateSetting({ settings, key, limit }: { settings: Record<string, unknown>; key: string; limit: number }) {
@@ -57,7 +95,7 @@ export function parseBoardConfig(settings: unknown): BoardConfig {
 	}
 	const record = settings as Record<string, unknown>;
 	return {
-		calendarURL: calendarURLSetting(record.calendarURL),
+		calendars: calendarsSetting(record.calendars),
 		latitude: coordinateSetting({ settings: record, key: 'latitude', limit: 90 }),
 		longitude: coordinateSetting({ settings: record, key: 'longitude', limit: 180 }),
 		temperatureUnit: temperatureUnitSetting(record.temperatureUnit),
