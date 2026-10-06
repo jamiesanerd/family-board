@@ -1,0 +1,22 @@
+{
+	"name": "family-board",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"license": "MIT",
+	"engines": {
+		"node": ">=22.18"
+	},
+	"scripts": {
+		"start": "node src/server.ts",
+		"test": "TZ=America/New_York node --test 'src/**/*.test.ts'",
+		"check": "tsc"
+	},
+	"dependencies": {
+		"ical.js": "^2.2.1"
+	},
+	"devDependencies": {
+		"@types/node": "^26.6.4",
+		"typescript": "^7.0.2"
+	}
+}
