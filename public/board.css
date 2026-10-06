@@ -38,7 +38,11 @@
 	--misregister-x: 0.3rem;
 	--misregister-y: 0.2rem;
 
-	font-size: clamp(10px, 0.8333vw, 24px);
+	font-size: clamp(9px, 2.5vw, 16px);
+
+	@media (width >= 900px) {
+		font-size: clamp(10px, 0.8333vw, 24px);
+	}
 }
 
 [data-theme='day'] {
@@ -89,16 +93,21 @@ ol {
 
 html,
 body {
-	block-size: 100%;
+	@media (width >= 900px) {
+		block-size: 100%;
+	}
 }
 
 body {
 	position: relative;
-	overflow: hidden;
 	background: var(--paper);
 	color: var(--ink-text);
 	font-family: var(--font-text);
 	cursor: none;
+
+	@media (width >= 900px) {
+		overflow: hidden;
+	}
 
 	&::before {
 		content: '';
@@ -115,10 +124,15 @@ body {
 		position: fixed;
 		inset-block-end: 0;
 		inset-inline: 0;
+		display: none;
 		block-size: 9rem;
 		background: conic-gradient(from 270deg at 1px 1px, var(--paper-shadow) 0 25%, transparent 0) 0 0 / 4px 4px;
 		mask-image: linear-gradient(to top, #000000, transparent);
 		pointer-events: none;
+
+		@media (width >= 900px) {
+			display: block;
+		}
 	}
 }
 
@@ -126,12 +140,15 @@ body {
 	position: relative;
 	z-index: 1;
 	display: grid;
-	gap: var(--space-5);
-	block-size: 100%;
-	padding: var(--space-5);
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--space-4);
+	padding: var(--space-3);
 
 	@media (width >= 900px) {
 		grid-template-columns: 40fr 60fr;
+		gap: var(--space-5);
+		block-size: 100%;
+		padding: var(--space-5);
 	}
 }
 
@@ -152,10 +169,13 @@ body {
 	display: flex;
 	flex-direction: column;
 	gap: var(--space-3);
-	flex: 1;
-	min-block-size: 0;
 	--knockout: var(--paper);
 	--knockout-width: 0.35rem;
+
+	@media (width >= 900px) {
+		flex: 1;
+		min-block-size: 0;
+	}
 
 	&:has(.board-photo:not([hidden])) .weather-card {
 		background: transparent;
@@ -179,8 +199,12 @@ body {
 	display: flex;
 	flex-direction: column;
 	gap: var(--space-3);
-	flex: 1;
-	min-block-size: 0;
+	min-block-size: 22rem;
+
+	@media (width >= 900px) {
+		flex: 1;
+		min-block-size: 0;
+	}
 }
 
 .board-photo {
@@ -218,9 +242,13 @@ body {
 .board-clock-time {
 	position: relative;
 	isolation: isolate;
-	font-size: 15rem;
+	font-size: min(11rem, 24vw);
 	letter-spacing: -0.04em;
 	font-variant-numeric: tabular-nums;
+
+	@media (width >= 900px) {
+		font-size: 15rem;
+	}
 
 	&::before,
 	&::after {
@@ -290,10 +318,23 @@ body {
 .weather-card {
 	position: relative;
 	display: grid;
-	grid-template-columns: auto auto 1fr;
+	grid-template-columns: auto 1fr;
 	align-items: center;
 	gap: var(--space-3);
-	padding: var(--space-3) var(--space-4);
+	padding: var(--space-3);
+
+	@media (width >= 900px) {
+		grid-template-columns: auto auto 1fr;
+		padding: var(--space-3) var(--space-4);
+	}
+
+	.weather-details {
+		grid-column: 1 / -1;
+
+		@media (width >= 900px) {
+			grid-column: auto;
+		}
+	}
 	border: 0.25rem solid var(--ink-text);
 	background: var(--paper);
 
@@ -354,6 +395,7 @@ body {
 
 .weather-range {
 	font-size: 2rem;
+	white-space: nowrap;
 	font-variant-numeric: tabular-nums;
 }
 
@@ -421,11 +463,14 @@ body {
 	display: flex;
 	flex-direction: column;
 	gap: var(--space-4);
-	flex: 1;
-	min-block-size: 0;
-	overflow: hidden;
 	padding-inline-start: calc(var(--span-lane-count, 0) * var(--span-lane-width));
 	--span-lane-width: 1.5rem;
+
+	@media (width >= 900px) {
+		flex: 1;
+		min-block-size: 0;
+		overflow: hidden;
+	}
 }
 
 .calendar-spans {
@@ -489,12 +534,16 @@ body {
 
 .calendar-event {
 	display: grid;
-	grid-template-columns: 15rem 1fr;
+	grid-template-columns: 12rem 1fr;
 	align-items: baseline;
 	gap: var(--space-3);
 	padding: var(--space-1) var(--space-2);
 	font-size: 2.5rem;
 	line-height: 1.25;
+
+	@media (width >= 900px) {
+		grid-template-columns: 15rem 1fr;
+	}
 
 	& + & {
 		border-block-start: 0.125rem dashed color-mix(in srgb, var(--ink-structure) 55%, transparent);
@@ -520,7 +569,10 @@ body {
 .calendar-event-time {
 	font-weight: 700;
 	font-variant-numeric: tabular-nums;
-	white-space: nowrap;
+
+	@media (width >= 900px) {
+		white-space: nowrap;
+	}
 
 	.calendar-event-all-day & {
 		color: var(--ink-accent);
@@ -533,9 +585,11 @@ body {
 }
 
 .calendar-event-title {
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+	@media (width >= 900px) {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
 }
 
 .calendar-empty {
