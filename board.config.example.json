@@ -1,0 +1,7 @@
+{
+	"calendarURL": "https://calendar.google.com/calendar/ical/[your-calendar-id]/private-[secret]/basic.ics",
+	"latitude": 40.71,
+	"longitude": -74.01,
+	"temperatureUnit": "fahrenheit",
+	"port": 8788
+}
