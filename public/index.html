@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en" data-theme="day">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Family board</title>
+		<link rel="stylesheet" href="board.css" />
+		<script type="module" src="board.js"></script>
+	</head>
+	<body>
+		<main class="board">
+			<section class="board-now">
+				<div class="board-print">
+					<div class="board-photo" aria-hidden="true" hidden>
+						<span class="board-photo-primary"></span>
+						<span class="board-photo-accent"></span>
+					</div>
+					<div class="board-hero">
+						<p class="board-clock"><span class="board-clock-time" data-time=""></span><span class="board-clock-meridiem"></span></p>
+						<p class="board-date"></p>
+					</div>
+					<div class="weather-card">
+						<span class="weather-icon"></span>
+						<p class="weather-temperature"></p>
+						<div class="weather-details">
+							<p class="weather-label"></p>
+							<p class="weather-range"></p>
+						</div>
+						<p class="weather-air-quality" hidden></p>
+					</div>
+				</div>
+				<div class="board-ramp" aria-hidden="true">
+					<span class="board-ramp-solid"></span>
+					<span class="board-ramp-checker"></span>
+					<span class="board-ramp-fine-dot"></span>
+					<span class="board-ramp-coarse-dot"></span>
+				</div>
+				<ol class="weather-forecast"></ol>
+				<p class="board-stale weather-stale" hidden></p>
+			</section>
+			<section class="board-upcoming">
+				<ol class="calendar"></ol>
+				<div class="calendar-spans" aria-hidden="true"></div>
+				<p class="board-stale calendar-stale" hidden></p>
+			</section>
+		</main>
+	</body>
+</html>
